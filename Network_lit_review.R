@@ -18,13 +18,16 @@ library("dplyr")
 library("tidyverse")
 
 #load data
-d <- read.csv("/Users/apple/Desktop/Dataset4.csv", header = TRUE)
-#drop NAs
-d <- drop_na(d)
+d <- read.csv("/Users/apple/Desktop/Dataset_4.csv", header = TRUE)
 #summary data
 dim(d)
 summary(d)
-#reverse score
+#reverse score"
+names(d)[17:60] <-c("A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9",
+                    "C10", "C11", "C12", "C13", "C14", "C15", "C16", "C17", "C18",
+                    "N19", "N20", "N21", "N22", "N23", "N24", "N25", "N26", 
+                    "O27", "O28", "O29", "O30", "O31", "O32", "O33", "O34", "O35", "O36",
+                    "E37", "E38", "E39", "E40", "E41", "E42", "E43", "E44")
 data_reverse <- d %>% 
   dplyr::mutate(A6 = recode( A6 , '1' = 5, '2' = 4, '3' = 4, '4' = 2, '5' = 1),
                 A7 = recode( A7 , '1' = 5, '2' = 4, '3' = 4, '4' = 2, '5' = 1),
@@ -47,6 +50,8 @@ data_reverse <- d %>%
                 N19, N20, N21, N22, N23, N24, N25, N26, 
                 O27, O28, O29, O30, O31, O32, O33, O34, O35, O36,
                 E37, E38, E39, E40, E41, E42, E43, E44)
+#drop NAs
+data_reverse <- drop_na(data_reverse)
 #check reversed data
 summary(data_reverse)
 #install qgraph
@@ -66,8 +71,14 @@ qgraph(data_zerooder, layout="spring",
                      "Neuroticism" = 19:26,
                      "Openness" = 27:36,
                      "Extroversion" = 37:44),
-       color = c("lightblue", "lightsalmon", "antiquewhite", "coral1", "darkolivegreen3"))
-
+       color = c("lightblue", "lightsalmon", "antiquewhite", "coral1", "darkolivegreen3"), graph = "pcor")
+qgraph(data_zerooder, layout="spring",
+       groups = list("Agreeableness" = 1:9, 
+                     "Conscientiousness" = 10:18,
+                     "Neuroticism" = 19:26,
+                     "Openness" = 27:36,
+                     "Extroversion" = 37:44),
+       color = c("lightblue", "lightsalmon", "antiquewhite", "coral1", "darkolivegreen3"),sampleSize= 175, graph = "glasso")
 
 ##########################2 networks for 2 traits #############################
 #agreement and extraversion are said interacting with each other
@@ -81,11 +92,10 @@ qgraph(ae_zerooder, layout="spring",
                      "Extroversion" = 10:17),
        color = c("lightblue", "lightsalmon"), graph = "pcor")
 ##FDA-glasso
-ae_glasso <- EBICglasso(cor(ae), n=175) 
-qgraph(ae_glasso,
+ae_glasso <- EBICglasso(cor(ae), n=175, gamma = 0.1) 
+qgraph(ae_glasso, gamma = 0.1,
        groups = list("Agreeableness" = 1:9, "Extroversion" = 10:17),
        color = c("lightblue", "lightsalmon"), vsize=4)
-text(-1,-1, paste("Stress=", round(ae_MDS_mspline$stress,2)))
 
 ##MDS-Partial
 install.packages("smacof")
@@ -118,8 +128,8 @@ qgraph(ae_zerooder, layout=ae_MDS_mspline$conf,
 text(-1,-1, paste("Stress=",round(ae_MDS_mspline$stress,2)))
 
 #MDS-glasso
-ae_glasso <- EBICglasso(cor(ae), n=175) 
-qgraph(ae_glasso,layout=ae_MDS_mspline$conf,
+ae_glasso <- EBICglasso(cor(ae), n=175, gamma = 0.1) 
+qgraph(ae_glasso,layout=ae_MDS_mspline$conf, gamma = 0.1,
        groups = list("Agreeableness" = 1:9, "Extroversion" = 10:17),
        color = c("lightblue", "lightsalmon"), vsize=4)
 text(-1,-1, paste("Stress=", round(ae_MDS_mspline$stress,2)))
@@ -148,7 +158,7 @@ qgraph(aen_zerooder, layout="spring",
                      "Extroversion" = 18:25),
        color = c("lightblue", "lightsalmon","antiquewhite"), graph = "pcor")
 ##FDA-glasso
-qgraph(aen_zerooder, layout="spring",
+qgraph(aen_zerooder, layout="spring", gamma =0.1,
        groups = list("Agreeableness" = 1:9, 
                      "neurotism" = 10:17,
                      "Extroversion" = 18:25),
@@ -181,19 +191,11 @@ qgraph(aen_zerooder, layout=aen_MDS_mspline$conf,
        groups = list("Agreeableness" = 1:9, 
                      "neurotism" = 10:17,
                      "Extroversion" = 18:25), 
-       color = c("lightblue","lightsalmon", "antiquewhite"), graph = "pcor", 
-       vsize=4)
+       color = c("lightblue","lightsalmon", "antiquewhite"), graph = "pcor", vsize=4)
 text(-1,-1, paste("Stress=",round(aen_MDS_mspline$stress,3)))
 
 #glasso
-aen_glasso <- EBICglasso(cor(aen), n=175) 
-
-qgraph(aen_glasso, layout="spring",
-       groups = list("Agreeableness" = 1:9, 
-                     "neurotism" = 10:17,
-                     "Extroversion" = 18:25),
-       color = c("lightblue", "lightsalmon","antiquewhite"))
-
+aen_glasso <- EBICglasso(cor(aen), n=175, gamma = 0.1) 
 qgraph(aen_glasso,layout=aen_MDS_mspline$conf,
        groups = list("Agreeableness" = 1:9, 
                      "neurotism" = 10:17,
